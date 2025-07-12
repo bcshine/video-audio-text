@@ -584,7 +584,7 @@ with col2:
                 st.error(f"❌ 오류: {e}")
     
     with col2:
-        # 영구 보관함 관리 버튼
+        # 영구 보관함 관리 버튼 (강제 업데이트)
         if st.button("⚙️ 보관함관리", help="영구 보관함 관리 옵션을 표시합니다"):
             archives_path = Path("archives")
             if archives_path.exists() and any(archives_path.iterdir()):
