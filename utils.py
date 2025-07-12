@@ -6,6 +6,7 @@
 
 import os
 import subprocess
+import shutil
 from pathlib import Path
 import time
 import yt_dlp
@@ -109,15 +110,22 @@ def save_text_to_file(text, file_path):
         print(f"❌ 파일 저장 실패: {e}")
         return None
 
-def process_youtube_to_text(url, output_path="downloads", model_size="base"):
+def process_youtube_to_text(url, output_path="downloads", model_size="base", save_to_archive=False):
     """
     전체 프로세스: 유튜브 URL → 영상 → 음성 → 텍스트
+    
+    Parameters:
+    - url: 유튜브 URL
+    - output_path: 임시 출력 경로
+    - model_size: Whisper 모델 크기
+    - save_to_archive: 영구 보관소에 저장 여부
     """
     result = {
         'video_file': None,
         'audio_file': None, 
         'text_file': None,
         'text_content': None,
+        'archived_files': [],
         'success': False,
         'error': None
     }
@@ -152,9 +160,50 @@ def process_youtube_to_text(url, output_path="downloads", model_size="base"):
             return result
         result['text_file'] = saved_text_file
         
+        # 5. 영구 보관소에 파일 복사 (선택적)
+        if save_to_archive:
+            archive_path = Path("archives")
+            archive_path.mkdir(exist_ok=True)
+            
+            # 비디오 ID 추출
+            video_path = Path(video_file)
+            video_id = video_path.parent.name.replace("video_", "")
+            
+            # 타임스탬프 추출
+            timestamp = video_path.stem.split("_")[0]
+            
+            # 아카이브 폴더 생성
+            archive_video_path = archive_path / f"video_{video_id}"
+            archive_video_path.mkdir(exist_ok=True)
+            
+            # 파일 복사
+            archived_files = []
+            
+            # 비디오 파일 복사
+            video_dest = archive_video_path / video_path.name
+            if not video_dest.exists():
+                shutil.copy2(video_file, video_dest)
+                archived_files.append(str(video_dest))
+            
+            # 오디오 파일 복사
+            audio_path = Path(audio_file)
+            audio_dest = archive_video_path / audio_path.name
+            if not audio_dest.exists():
+                shutil.copy2(audio_file, audio_dest)
+                archived_files.append(str(audio_dest))
+            
+            # 텍스트 파일 복사
+            text_path = Path(text_file)
+            text_dest = archive_video_path / text_path.name
+            if not text_dest.exists():
+                shutil.copy2(text_file, text_dest)
+                archived_files.append(str(text_dest))
+            
+            result['archived_files'] = archived_files
+        
         result['success'] = True
         
     except Exception as e:
         result['error'] = f"처리 중 오류: {str(e)}"
     
-    return result 
+    return result
