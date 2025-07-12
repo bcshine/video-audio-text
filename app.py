@@ -56,12 +56,12 @@ col1, col2 = st.columns([3, 1])
 
 with col2:
     # 폴더 정리 버튼
-    if st.button("🧹 폴더 정리"):
+    if st.button("🧹 폴더비우기"):
         try:
             downloads_path = Path("downloads")
             if downloads_path.exists():
                 shutil.rmtree(downloads_path)
-                st.success("✅ 폴더 정리 완료!")
+                st.success("✅ 폴더 비우기 완료!")
             else:
                 st.info("📁 폴더가 비어있습니다.")
         except Exception as e:
