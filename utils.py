@@ -22,9 +22,14 @@ def download_youtube_video(url, output_path="downloads"):
         print(f"❌ 영상 정보 추출 실패: {e}")
         return None
     
+    # 기본 downloads 폴더 생성
+    os.makedirs(output_path, exist_ok=True)
+    
     # 각 영상마다 별도 폴더 생성
     unique_folder = os.path.join(output_path, f"video_{video_id}")
     os.makedirs(unique_folder, exist_ok=True)
+    
+    print(f"📁 폴더 생성: {unique_folder}")
     
     # 타임스탬프 기반 파일명
     timestamp = int(time.time())
@@ -50,8 +55,10 @@ def download_youtube_video(url, output_path="downloads"):
             
             if video_files:
                 latest_file = max(video_files, key=lambda f: f.stat().st_mtime)
+                print(f"✅ 영상 다운로드 완료: {latest_file.name}")
                 return str(latest_file)
             else:
+                print("❌ 다운로드된 파일을 찾을 수 없습니다.")
                 return None
                     
     except Exception as e:
